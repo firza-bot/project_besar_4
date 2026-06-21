@@ -202,6 +202,87 @@ def api_dataset_upload(request):
     except Exception as e:
         return JsonResponse({"detail": str(e)}, status=500)
 
+
+# ─────────────────────────────────────────────
+# /api/process — Preprocessing endpoint
+# ─────────────────────────────────────────────
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_process(request):
+    try:
+        body = json.loads(request.body)
+        dataset_id = body.get("dataset_id", "")
+        missing_values = body.get("missing_values", "Drop blank rows")
+        duplicate_strategy = body.get("duplicate_strategy", "Drop Duplicates")
+        categorical_encoding = body.get("categorical_encoding", True)
+        apply_standardization = body.get("apply_standardization", True)
+
+        # Load dataset from file storage
+        dataset_path = os.path.join(DATASETS_DIR, f"{dataset_id}.csv")
+        if not os.path.exists(dataset_path):
+            return JsonResponse({"detail": "Dataset not found. Please load a dataset first."}, status=404)
+
+        df = pd.read_csv(dataset_path)
+
+        # 1. Handle Duplicates
+        if duplicate_strategy == "Drop Duplicates":
+            df = df.drop_duplicates()
+
+        # 2. Handle Missing Values
+        for col in df.columns:
+            if df[col].isnull().any():
+                if missing_values == "Drop blank rows":
+                    df = df.dropna(subset=[col])
+                elif missing_values == "Fill with mean":
+                    if pd.api.types.is_numeric_dtype(df[col]):
+                        df[col] = df[col].fillna(df[col].mean())
+                    else:
+                        df[col] = df[col].fillna(df[col].mode()[0] if not df[col].mode().empty else "Missing")
+                elif missing_values == "Fill with median":
+                    if pd.api.types.is_numeric_dtype(df[col]):
+                        df[col] = df[col].fillna(df[col].median())
+                    else:
+                        df[col] = df[col].fillna(df[col].mode()[0] if not df[col].mode().empty else "Missing")
+                elif missing_values == "Fill with mode":
+                    df[col] = df[col].fillna(df[col].mode()[0] if not df[col].mode().empty else "Missing")
+
+        # 3. Categorical Encoding
+        if categorical_encoding:
+            for col in df.columns:
+                if not pd.api.types.is_numeric_dtype(df[col]):
+                    le = LabelEncoder()
+                    df[col] = le.fit_transform(df[col].astype(str))
+
+        # 4. Standardization (numeric cols only)
+        if apply_standardization:
+            numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+            if numeric_cols:
+                scaler = StandardScaler()
+                df[numeric_cols] = scaler.fit_transform(df[numeric_cols])
+                df[numeric_cols] = df[numeric_cols].round(4)
+
+        # Stats
+        stats = {
+            "row_count": len(df),
+            "column_count": len(df.columns),
+            "numeric_columns": df.select_dtypes(include=[np.number]).columns.tolist(),
+        }
+
+        # Save processed file
+        df.to_csv(os.path.join(DATASETS_DIR, f"{dataset_id}_processed.csv"), index=False)
+
+        # Serialize (NaN safe)
+        df_clean = df.copy().fillna(0)
+        processed_rows = df_clean.to_dict(orient="records")
+
+        return JsonResponse({
+            "processed_rows": processed_rows,
+            "columns": list(df.columns),
+            "stats": stats
+        })
+    except Exception as e:
+        return JsonResponse({"detail": str(e)}, status=500)
+
 # Background training thread
 def run_training_pipeline_sync(job_id: str, config: dict):
     try:

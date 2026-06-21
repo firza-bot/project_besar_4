@@ -201,6 +201,83 @@ async def api_dataset_upload(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ─────────────────────────────────────────────
+# /api/process — Apply preprocessing to existing dataset and return processed rows
+# ─────────────────────────────────────────────
+class ProcessRequest(BaseModel):
+    dataset_id: str
+    missing_values: str = "Drop blank rows"
+    duplicate_strategy: str = "Drop Duplicates"
+    categorical_encoding: bool = True
+    apply_standardization: bool = True
+
+@app.post("/api/process")
+async def api_process(req: ProcessRequest):
+    if req.dataset_id not in datasets_db:
+        raise HTTPException(status_code=404, detail="Dataset not found. Please load a dataset first.")
+    
+    try:
+        df = datasets_db[req.dataset_id].copy()
+        
+        # 1. Handle Duplicates
+        if req.duplicate_strategy == "Drop Duplicates":
+            df = df.drop_duplicates()
+        
+        # 2. Handle Missing Values
+        for col in df.columns:
+            if df[col].isnull().any():
+                if req.missing_values == "Drop blank rows":
+                    df = df.dropna(subset=[col])
+                elif req.missing_values == "Fill with mean":
+                    if pd.api.types.is_numeric_dtype(df[col]):
+                        df[col] = df[col].fillna(df[col].mean())
+                    else:
+                        df[col] = df[col].fillna(df[col].mode()[0] if not df[col].mode().empty else "Missing")
+                elif req.missing_values == "Fill with median":
+                    if pd.api.types.is_numeric_dtype(df[col]):
+                        df[col] = df[col].fillna(df[col].median())
+                    else:
+                        df[col] = df[col].fillna(df[col].mode()[0] if not df[col].mode().empty else "Missing")
+                elif req.missing_values == "Fill with mode":
+                    df[col] = df[col].fillna(df[col].mode()[0] if not df[col].mode().empty else "Missing")
+        
+        # 3. Categorical Encoding
+        if req.categorical_encoding:
+            for col in df.columns:
+                if not pd.api.types.is_numeric_dtype(df[col]):
+                    le = LabelEncoder()
+                    df[col] = le.fit_transform(df[col].astype(str))
+        
+        # 4. Standardization (only numeric cols)
+        if req.apply_standardization:
+            numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+            if numeric_cols:
+                scaler = StandardScaler()
+                df[numeric_cols] = scaler.fit_transform(df[numeric_cols])
+                df[numeric_cols] = df[numeric_cols].round(4)
+        
+        # Build stats
+        stats = {
+            "row_count": len(df),
+            "column_count": len(df.columns),
+            "numeric_columns": df.select_dtypes(include=[np.number]).columns.tolist(),
+        }
+        
+        # Store processed dataset back (update)
+        datasets_db[req.dataset_id + "_processed"] = df
+        
+        # Serialize rows (NaN safe)
+        df_clean = df.copy().fillna(0)
+        processed_rows = df_clean.to_dict(orient="records")
+        
+        return {
+            "processed_rows": processed_rows,
+            "columns": list(df.columns),
+            "stats": stats
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Async Training Job Runner
 def run_training_pipeline(job_id: str, config: Dict[str, Any]):
     try:
@@ -560,6 +637,7 @@ async def api_train_result(job_id: str):
     return job["result"]
 
 @app.get("/api/model/download/{job_id}")
+@app.get("/api/train/download/{job_id}")
 async def api_model_download(job_id: str):
     if job_id not in training_jobs:
         raise HTTPException(status_code=404, detail="Job not found")

@@ -7,20 +7,365 @@
 }
 
 /* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.3); }
+::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
+
+/* ─────────────────────────────────────────────
+   WIZARD LAYOUT
+───────────────────────────────────────────── */
+.wizard-root {
+  @apply flex flex-col min-h-screen;
 }
 
-::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.3);
+/* TOP BAR */
+.wizard-topbar {
+  @apply flex items-center justify-between px-6 py-3 border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-10;
+}
+.topbar-breadcrumb {
+  @apply flex items-center gap-2 text-sm text-slate-400;
+}
+.breadcrumb-sep { @apply text-slate-600; }
+.breadcrumb-active { @apply text-slate-200 font-medium; }
+.topbar-actions { @apply flex items-center gap-2; }
+
+/* BODY */
+.wizard-body {
+  @apply flex flex-1 overflow-hidden;
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
-  border-radius: 4px;
+/* SIDEBAR */
+.wizard-sidebar {
+  @apply flex flex-col gap-0 w-56 shrink-0 bg-slate-900 border-r border-slate-800 px-4 py-8;
+}
+.sidebar-step {
+  @apply flex items-start gap-3;
+}
+.step-connector-wrap {
+  @apply flex flex-col items-center;
+}
+.step-circle {
+  @apply w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 border-2;
+}
+.step-circle--completed {
+  @apply bg-emerald-500 border-emerald-500 text-white;
+}
+.step-circle--active {
+  @apply bg-slate-100 border-slate-100 text-slate-900;
+}
+.step-circle--pending {
+  @apply bg-transparent border-slate-600 text-slate-500;
+}
+.step-line {
+  @apply w-0.5 h-8 bg-slate-700 my-1;
+}
+.step-line--completed {
+  @apply bg-emerald-500;
+}
+.step-label {
+  @apply text-sm text-slate-500 mt-1.5;
+}
+.step-label--active {
+  @apply text-slate-100 font-medium;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
+/* MAIN */
+.wizard-main {
+  @apply flex flex-col flex-1 overflow-y-auto;
+}
+.wizard-card {
+  @apply flex-1 m-6 bg-slate-900 rounded-xl border border-slate-800 overflow-hidden;
+}
+
+/* FOOTER */
+.wizard-footer {
+  @apply flex items-center justify-between px-6 py-4 border-t border-slate-800 bg-slate-900/60;
+}
+
+/* ─────────────────────────────────────────────
+   STEP CONTENT
+───────────────────────────────────────────── */
+.step-content {
+  @apply p-8 flex flex-col gap-6;
+}
+.section-title {
+  @apply text-xs tracking-widest text-slate-400 font-semibold uppercase mb-2;
+}
+
+/* ─────────────────────────────────────────────
+   FORM ELEMENTS
+───────────────────────────────────────────── */
+.form-group {
+  @apply flex flex-col gap-2;
+}
+.form-label {
+  @apply text-xs font-semibold tracking-widest text-slate-400 uppercase;
+}
+.form-input {
+  @apply w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 text-sm
+         placeholder:text-slate-500 focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-600 transition;
+}
+.form-textarea {
+  @apply w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 text-sm
+         placeholder:text-slate-500 focus:outline-none focus:border-slate-500 resize-y transition;
+}
+.form-select {
+  @apply w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 text-sm
+         focus:outline-none focus:border-slate-500 transition;
+}
+.form-hint {
+  @apply text-xs text-slate-500;
+}
+.form-group-inline {
+  @apply flex items-center gap-2;
+}
+.form-label-sm {
+  @apply text-xs text-slate-400 shrink-0;
+}
+.form-select-sm {
+  @apply bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 text-xs focus:outline-none;
+}
+
+/* RADIO CARDS */
+.radio-card-group {
+  @apply flex gap-3 flex-wrap;
+}
+.radio-card {
+  @apply flex-1 min-w-36 cursor-pointer rounded-lg border border-slate-700 bg-slate-800 px-4 py-3
+         hover:border-slate-500 transition;
+}
+.radio-card--selected {
+  @apply border-emerald-500 bg-emerald-500/10;
+}
+.radio-card-label {
+  @apply text-sm font-semibold text-slate-200;
+}
+.radio-card-desc {
+  @apply text-xs text-slate-500 mt-0.5;
+}
+
+/* CHECKBOX */
+.checkbox-row {
+  @apply flex items-center gap-2 text-sm text-slate-300 cursor-pointer;
+}
+
+/* BADGE */
+.badge {
+  @apply ml-2 text-xs bg-amber-500/20 text-amber-400 rounded px-2 py-0.5;
+}
+
+/* ─────────────────────────────────────────────
+   BUTTONS
+───────────────────────────────────────────── */
+.btn-outlined {
+  @apply px-4 py-1.5 rounded-lg border border-slate-600 text-slate-300 text-sm hover:bg-slate-800 transition;
+}
+.btn-purple {
+  @apply px-4 py-1.5 rounded-lg bg-violet-600 text-white text-sm hover:bg-violet-700 transition;
+}
+.btn-danger {
+  @apply px-4 py-1.5 rounded-lg bg-red-600 text-white text-sm hover:bg-red-700 transition;
+}
+.btn-nav {
+  @apply px-6 py-2 rounded-lg text-sm font-medium transition;
+}
+.btn-nav--prev {
+  @apply bg-slate-800 text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed;
+}
+.btn-nav--proceed {
+  @apply bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed;
+}
+.btn-process {
+  @apply mt-2 px-5 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 transition flex items-center gap-2;
+}
+.btn-swap {
+  @apply px-2 py-1 text-xs bg-slate-700 rounded hover:bg-slate-600 transition;
+}
+.btn-action {
+  @apply px-5 py-2 bg-slate-700 text-sm text-slate-200 rounded-lg hover:bg-slate-600 transition;
+}
+
+/* ─────────────────────────────────────────────
+   LOADING / ERROR
+───────────────────────────────────────────── */
+.loading-row {
+  @apply flex items-center gap-3 text-slate-400 text-sm;
+}
+.spinner {
+  @apply inline-block w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin;
+}
+.spinner--lg {
+  @apply w-10 h-10 border-4;
+}
+.error-banner {
+  @apply bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg px-4 py-3 text-sm;
+}
+
+/* ─────────────────────────────────────────────
+   DATA TABLE
+───────────────────────────────────────────── */
+.data-table-wrap {
+  @apply flex flex-col gap-2;
+}
+.table-label {
+  @apply text-xs font-semibold tracking-widest text-slate-400 uppercase;
+}
+.table-scroll {
+  @apply overflow-x-auto rounded-lg border border-slate-700;
+}
+.data-table {
+  @apply w-full text-xs text-slate-300;
+}
+.data-table thead tr {
+  @apply bg-slate-800;
+}
+.data-table th {
+  @apply px-3 py-2 text-left text-slate-400 font-semibold whitespace-nowrap;
+}
+.data-table td {
+  @apply px-3 py-1.5 whitespace-nowrap border-t border-slate-800;
+}
+.data-table tbody tr:hover {
+  @apply bg-slate-800/40;
+}
+.table-divider-row td {
+  @apply text-center text-slate-500 italic py-2 bg-slate-800/60;
+}
+
+/* ─────────────────────────────────────────────
+   SUMMARY / PROCESSING CARDS
+───────────────────────────────────────────── */
+.summary-card {
+  @apply bg-slate-800/60 border border-slate-700 rounded-xl p-5;
+}
+.summary-card-title {
+  @apply text-xs font-semibold tracking-widest text-slate-400 uppercase mb-3;
+}
+.summary-grid {
+  @apply flex flex-wrap gap-4;
+}
+.summary-item {
+  @apply flex flex-col gap-1;
+}
+.summary-key {
+  @apply text-xs text-slate-500;
+}
+.summary-val {
+  @apply text-sm text-slate-200 font-medium;
+}
+
+.processing-card {
+  @apply bg-slate-800/60 border border-slate-700 rounded-xl p-5 flex flex-col gap-4;
+}
+.processing-card-title {
+  @apply text-xs font-semibold tracking-widest text-slate-400 uppercase;
+}
+
+/* ─────────────────────────────────────────────
+   CHARTS
+───────────────────────────────────────────── */
+.chart-section {
+  @apply bg-slate-800/40 border border-slate-700 rounded-xl p-5 flex flex-col gap-3;
+}
+.chart-title {
+  @apply text-xs font-semibold tracking-widest text-slate-400 uppercase;
+}
+.axis-selector-row {
+  @apply flex items-center gap-3 flex-wrap;
+}
+.histogram-pair {
+  @apply grid grid-cols-2 gap-4;
+}
+.histogram-item {
+  @apply flex flex-col gap-2;
+}
+
+/* ─────────────────────────────────────────────
+   PARAMS CARD
+───────────────────────────────────────────── */
+.params-card {
+  @apply bg-slate-800/60 border border-slate-700 rounded-xl p-5 flex flex-col gap-4;
+}
+.params-card-title {
+  @apply text-xs font-semibold tracking-widest text-slate-400 uppercase;
+}
+.param-row {
+  @apply flex items-center justify-between gap-4;
+}
+.param-label {
+  @apply text-sm text-slate-300 shrink-0 w-44;
+}
+.param-input {
+  @apply flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-1.5 text-sm text-slate-100
+         focus:outline-none focus:border-slate-500 transition;
+}
+.param-select {
+  @apply flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-1.5 text-sm text-slate-100
+         focus:outline-none transition;
+}
+
+/* ─────────────────────────────────────────────
+   TRAINING / STEP 5
+───────────────────────────────────────────── */
+.training-pending {
+  @apply flex flex-col items-center gap-4 py-16;
+}
+.training-msg {
+  @apply text-slate-400 text-sm text-center max-w-sm;
+}
+.progress-bar-wrap {
+  @apply w-full max-w-md h-2 bg-slate-800 rounded-full overflow-hidden;
+}
+.progress-bar {
+  @apply h-full bg-emerald-500 transition-all duration-500;
+}
+.metric-grid {
+  @apply grid grid-cols-2 gap-4 sm:grid-cols-4;
+}
+.metric-card {
+  @apply bg-slate-800/60 border border-slate-700 rounded-xl p-4 text-center;
+}
+.metric-label {
+  @apply text-xs text-slate-400 mb-1;
+}
+.metric-value {
+  @apply text-2xl font-bold text-emerald-400;
+}
+.action-row {
+  @apply flex gap-3 flex-wrap;
+}
+
+/* ─────────────────────────────────────────────
+   CONFUSION MATRIX
+───────────────────────────────────────────── */
+.confusion-wrap {
+  @apply bg-slate-800/40 border border-slate-700 rounded-xl p-5 flex flex-col gap-3;
+}
+.confusion-table {
+  @apply mx-auto;
+}
+.confusion-cell {
+  @apply w-16 h-16 text-center font-semibold text-lg border border-slate-700 bg-slate-800;
+}
+.confusion-cell--diag {
+  @apply bg-emerald-500/20 text-emerald-400;
+}
+
+/* ─────────────────────────────────────────────
+   TOAST
+───────────────────────────────────────────── */
+.toast {
+  @apply fixed bottom-6 right-6 px-5 py-3 rounded-xl text-sm font-medium shadow-xl z-50;
+  animation: toastIn 0.3s ease;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.toast--success {
+  @apply bg-emerald-600 text-white;
+}
+.toast--error {
+  @apply bg-red-600 text-white;
 }
