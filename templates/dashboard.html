@@ -3958,7 +3958,7 @@
                         </div>
                         <div class="pg-status-dot dot-yellow" id="g3-status-dot"></div>
                     </div>
-                    <p class="pg-desc">Jalankan 8 tahap pipeline AI: Problem Framing, Definisi, Pemrosesan, Perencanaan, Training, Refining, hingga Komunikasi Teknikal & Manajemen.</p>
+                    <p class="pg-desc">Jalankan 5 tahap pipeline AI: Problem Framing, Definisi Dataset, Pemrosesan, Perencanaan Model, hingga Engine Execution.</p>
 
                     <div class="pg-queue-info" id="g3-queue-info">
                         <div class="pg-queue-empty">
@@ -5855,7 +5855,7 @@
             <div class="pm-header">
                 <div class="pm-icon">⚙️</div>
                 <div class="pm-title">Kirim ke Proses Data Entry</div>
-                <div class="pm-subtitle">Data akan dikirim ke Grid 3 untuk diproses 8 tahap pipeline AI</div>
+                <div class="pm-subtitle">Data akan dikirim ke Grid 3 untuk diproses 5 tahap pipeline AI</div>
             </div>
             <div class="pm-summary" id="pm-summary-2to3"></div>
             <div class="pm-actions">
@@ -5995,14 +5995,11 @@
                 const pipelineData = activeSub.pipeline_data || {};
                 
                 pipelineState.grid2Stages = [
-                    { name: 'Problem Framing & IPO', status: currentStage > 0 ? 'done' : 'active', data: pipelineData.stage_0 },
-                    { name: 'Pendefinisian Model Dataset', status: currentStage > 1 ? 'done' : (currentStage === 1 ? 'active' : 'wait'), data: pipelineData.stage_1 },
-                    { name: 'Pemrosesan Data', status: currentStage > 2 ? 'done' : (currentStage === 2 ? 'active' : 'wait'), data: pipelineData.stage_2 },
-                    { name: 'Perencanaan Model & Refining', status: currentStage > 3 ? 'done' : (currentStage === 3 ? 'active' : 'wait'), data: pipelineData.stage_3 },
-                    { name: 'Pelatihan & Testing Model', status: currentStage > 4 ? 'done' : (currentStage === 4 ? 'active' : 'wait'), data: pipelineData.stage_4 },
-                    { name: 'Refining Model', status: currentStage > 5 ? 'done' : (currentStage === 5 ? 'active' : 'wait'), data: pipelineData.stage_5 },
-                    { name: 'Materi Komunikasi Teknikal', status: currentStage > 6 ? 'done' : (currentStage === 6 ? 'active' : 'wait'), data: pipelineData.stage_6 },
-                    { name: 'Materi Komunikasi Manajemen', status: currentStage > 7 ? 'done' : (currentStage === 7 ? 'active' : 'wait'), data: pipelineData.stage_7 }
+                    { name: 'Problem Framing', status: currentStage > 0 ? 'done' : 'active', data: pipelineData.stage_0 },
+                    { name: 'Dataset Definition', status: currentStage > 1 ? 'done' : (currentStage === 1 ? 'active' : 'wait'), data: pipelineData.stage_1 },
+                    { name: 'Processing', status: currentStage > 2 ? 'done' : (currentStage === 2 ? 'active' : 'wait'), data: pipelineData.stage_2 },
+                    { name: 'Model Planning', status: currentStage > 3 ? 'done' : (currentStage === 3 ? 'active' : 'wait'), data: pipelineData.stage_3 },
+                    { name: 'Engine Execution', status: currentStage > 4 ? 'done' : (currentStage === 4 ? 'active' : 'wait'), data: pipelineData.stage_4 }
                 ];
             } else if (pipelineState.grid3Data.length > 0) {
                 const completedSub = pipelineState.grid3Data[0];
@@ -6010,14 +6007,11 @@
                 const pipelineData = completedSub.pipeline_data || {};
                 
                 pipelineState.grid2Stages = [
-                    { name: 'Problem Framing & IPO', status: 'done', data: pipelineData.stage_0 },
-                    { name: 'Pendefinisian Model Dataset', status: 'done', data: pipelineData.stage_1 },
-                    { name: 'Pemrosesan Data', status: 'done', data: pipelineData.stage_2 },
-                    { name: 'Perencanaan Model & Refining', status: 'done', data: pipelineData.stage_3 },
-                    { name: 'Pelatihan & Testing Model', status: 'done', data: pipelineData.stage_4 },
-                    { name: 'Refining Model', status: 'done', data: pipelineData.stage_5 },
-                    { name: 'Materi Komunikasi Teknikal', status: 'done', data: pipelineData.stage_6 },
-                    { name: 'Materi Komunikasi Manajemen', status: 'done', data: pipelineData.stage_7 }
+                    { name: 'Problem Framing', status: 'done', data: pipelineData.stage_0 },
+                    { name: 'Dataset Definition', status: 'done', data: pipelineData.stage_1 },
+                    { name: 'Processing', status: 'done', data: pipelineData.stage_2 },
+                    { name: 'Model Planning', status: 'done', data: pipelineData.stage_3 },
+                    { name: 'Engine Execution', status: 'done', data: pipelineData.stage_4 }
                 ];
             } else {
                 activeSubmissionId = null;
