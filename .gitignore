@@ -8,7 +8,6 @@ wizard_storage/
 __pycache__/
 db.sqlite3
 db.sqlite3.backup
-staticfiles/
 media/
 uploads/
 ml_engine/
