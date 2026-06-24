@@ -389,8 +389,8 @@ class IntelligenceSubmissionViewSet(viewsets.ModelViewSet):
         if old_status != 'sent' and instance.status == 'sent':
             import requests
             
-            # URL API Implementasi (Bisa di-override lewat ENV var)
-            target_url = os.environ.get('IMPLEMENTATION_API_URL', 'http://127.0.0.1:8000/api/datasets/')
+            # URL API Implementasi (Hardcoded fallback ke VPS publik)
+            target_url = os.environ.get('IMPLEMENTATION_API_URL', 'http://72.61.215.222/implementation/api-content/datasets/')
             
             try:
                 data = {
