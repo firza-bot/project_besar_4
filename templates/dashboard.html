@@ -4090,9 +4090,12 @@
                         <div class="loading-dots"><span></span><span></span><span></span></div>
                     </div>
 
-                    <div class="pg-actions">
-                        <button class="pg-btn-primary" id="g2-send-btn" onclick="handleG2SendBtn()" disabled>
-                            Kirim ke Proses → <span class="pg-send-count" id="g2-send-count">0</span>
+                    <div class="pg-actions" style="display: flex; gap: 10px;">
+                        <button class="pg-btn-secondary" id="g2-req-btn" onclick="handleRequestDataset()" style="flex: 1;" disabled>
+                            Request Dataset
+                        </button>
+                        <button class="pg-btn-primary" id="g2-send-btn" onclick="handleG2SendBtn()" style="flex: 1;" disabled>
+                            Lanjut ke Grid 3 → <span class="pg-send-count" id="g2-send-count">0</span>
                         </button>
                     </div>
                 </div>
@@ -6453,17 +6456,25 @@
     function updateG2SendBtnMode() {
         const hasFile = g2SelectedFile !== null;
         const hasSelected = pipelineState.grid1Selected.length > 0;
-        const btn = document.getElementById('g2-send-btn');
+        
+        const selectedId = hasSelected ? pipelineState.grid1Selected[0] : null;
+        const item = selectedId ? pipelineState.grid1Data.find(s => s.id === selectedId) : null;
+        const hasSourceFile = item && item.source_file;
+
+        const reqBtn = document.getElementById('g2-req-btn');
+        const sendBtn = document.getElementById('g2-send-btn');
         const countEl = document.getElementById('g2-send-count');
-        if (btn) {
-            if (hasFile) {
-                btn.disabled = false;
+
+        if (reqBtn) {
+            reqBtn.disabled = !(hasSelected && !hasSourceFile && !hasFile);
+        }
+
+        if (sendBtn) {
+            if (hasFile || hasSourceFile) {
+                sendBtn.disabled = false;
                 if (countEl) countEl.textContent = '1';
-            } else if (hasSelected) {
-                btn.disabled = false;
-                if (countEl) countEl.textContent = hasSelected;
             } else {
-                btn.disabled = true;
+                sendBtn.disabled = true;
                 if (countEl) countEl.textContent = '0';
             }
         }
@@ -6667,6 +6678,77 @@
         document.getElementById('pm-overlay-2to3').classList.add('active');
     }
 
+    async function handleRequestDataset() {
+        if (pipelineState.grid1Selected.length === 0) return;
+        const targetId = pipelineState.grid1Selected[0];
+
+        const titleVal = document.getElementById('g2-form-title')?.value.trim() || 'Tanpa Judul';
+        const descVal = document.getElementById('g2-form-desc')?.value.trim() || '';
+        const contactVal = document.getElementById('g2-form-contact')?.value.trim() || '';
+        const minRowVal = document.getElementById('g2-form-minrow')?.value.trim() || '';
+        const reqColsVal = document.getElementById('g2-form-reqcols')?.value.trim() || '';
+        const urgencyVal = document.getElementById('g2-form-urgency')?.value || 'medium';
+
+        try {
+            const csrfToken = getCookie('csrftoken') || '';
+
+            // Step A: Save edits via PATCH request
+            await fetch(`/creation/api/v2/submissions/${targetId}/`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    title: titleVal,
+                    description: descVal,
+                    sender_email: contactVal,
+                    extra_metadata: {
+                        min_rows: minRowVal,
+                        required_columns: reqColsVal
+                    }
+                })
+            });
+
+            const reqBtn = document.getElementById('g2-req-btn');
+            if (reqBtn) {
+                reqBtn.disabled = true;
+                reqBtn.textContent = 'Meminta...';
+            }
+
+            const reqRes = await fetch(`/creation/api/datago/request/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    submission_id: targetId,
+                    title: titleVal,
+                    description: descVal,
+                    contact: contactVal,
+                    urgency: urgencyVal,
+                    min_rows: minRowVal,
+                    required_columns: reqColsVal
+                })
+            });
+            
+            if (reqRes.ok) {
+                showToast('✅ Permintaan berhasil dikirim ke Tim Dataset!', 'success');
+                await loadPipelineData(); // reload so UI is fresh
+            } else {
+                const err = await reqRes.json();
+                showToast('Gagal mengirim ke Datago: ' + (err.error || 'Unknown error'), 'error');
+            }
+        } catch (e) {
+            showToast('Gagal: ' + e.message, 'error');
+        } finally {
+            const reqBtn = document.getElementById('g2-req-btn');
+            if (reqBtn) reqBtn.textContent = 'Request Dataset';
+            updateG2SendBtnMode();
+        }
+    }
+
     async function confirmSendToGrid3() {
         if (pipelineState.grid1Selected.length === 0) return;
         const targetId = pipelineState.grid1Selected[0];
@@ -6698,7 +6780,7 @@
                 })
             });
 
-            // Step B: Approve stage via POST request
+            // Step B: Approve stage via POST request (Move to Grid 3)
             const res = await fetch(`/creation/api/v2/submissions/${targetId}/approve_stage/`, {
                 method: 'POST',
                 headers: {
@@ -6708,7 +6790,7 @@
                 body: JSON.stringify({})
             });
             if (res.ok) {
-                showToast('✓ Data berhasil dikirim ke Grid 3!', 'success');
+                showToast('🚀 Data berhasil dikirim ke Grid 3!', 'success');
                 pipelineState.grid1Selected = [];
                 updateGrid2SendBtn();
                 closePipelineModal('pm-overlay-2to3');
