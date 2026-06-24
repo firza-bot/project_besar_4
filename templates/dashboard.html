@@ -7549,6 +7549,10 @@
             } catch (e) {
                 console.error("Failed to fetch AutoML result, falling back to data quality charts:", e);
             }
+        } else {
+            showToast("Grafik/Laporan belum tersedia (Tidak ada Job ID yang terasosiasi).", "warning");
+            openGrid4Chart();
+            return;
         }
         const s1 = pd.stage_1 || {};
         const s2 = pd.stage_2 || {};
@@ -8355,6 +8359,9 @@
                 showToast(`🚀 Model berhasil dikirim ke Kelompok Implementasi!`, 'success');
                 if (newWindow && jobId) {
                     newWindow.location.href = `/api/train/pdf-report/${jobId}`;
+                } else if (newWindow) {
+                    newWindow.close();
+                    setTimeout(() => showToast('Catatan: Grafik PDF tidak tersedia (Job ID tidak ditemukan)', 'warning'), 1500);
                 }
                 closePipelineModal('pm-overlay-final');
                 await loadPipelineData();
