@@ -10,6 +10,7 @@ services:
     environment:
       - DEBUG=0
       - SECRET_KEY=ganti_dengan_key_produksi_anda
+      - INTRING_API_URL=${INTRING_API_URL:-}
     networks:
       - django_net
 
