@@ -110,6 +110,7 @@ def issue_full_detail_page(request, issue_id):
             upload = request.FILES['evidence_file']
             c_status.evidence_file = upload
             c_status.save()
+            upload.seek(0)
             files = {'evidence_file': (upload.name, upload.read(), upload.content_type)}
             
         new_category = request.POST.get('new_orch_category')
