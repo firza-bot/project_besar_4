@@ -4077,11 +4077,12 @@
                     <!-- File untuk Diproses indicator -->
                     <div class="g2-form-group" style="margin: 6px 0 0 0;">
                         <label class="g2-form-label" style="font-size:0.68rem; color:rgba(255,255,255,0.45);">File untuk Diproses</label>
-                        <div class="g2-file-box" id="g2-file-box">
+                        <input type="file" id="g2-file-upload" style="display:none;" onchange="handleG2ManualFileUpload(event)">
+                        <div class="g2-file-box" id="g2-file-box" style="cursor: pointer;" onclick="document.getElementById('g2-file-upload').click()">
                             <span class="g2-file-box-icon">📄</span>
                             <div class="g2-file-box-text">
                                 <div class="g2-file-box-label">File terpilih</div>
-                                <div class="g2-file-box-name" id="g2-file-name">Belum ada file yang diunggah</div>
+                                <div class="g2-file-box-name" id="g2-file-name">Belum ada file yang diunggah (Klik untuk unggah)</div>
                             </div>
                         </div>
                     </div>
@@ -6431,6 +6432,32 @@
         }
         updateG2SendBtnMode();
         showToast('📎 File terpilih: ' + file.name, 'info');
+    }
+
+    function handleG2ManualFileUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        g2SelectedFile = file;
+        const nameEl = document.getElementById('g2-file-name');
+        const box = document.getElementById('g2-file-box');
+        if (nameEl) nameEl.textContent = file.name;
+        if (box) {
+            box.classList.add('has-file');
+            box.querySelector('.g2-file-box-icon').textContent = '📄';
+            let clearBtn = box.querySelector('.g2-file-clear-btn');
+            if (!clearBtn) {
+                clearBtn = document.createElement('button');
+                clearBtn.className = 'g2-file-clear-btn';
+                clearBtn.innerHTML = '×';
+                clearBtn.onclick = (ev) => {
+                    ev.stopPropagation(); // Mencegah memicu klik unggah lagi
+                    clearG2File();
+                };
+                box.appendChild(clearBtn);
+            }
+        }
+        updateG2SendBtnMode();
+        showToast('📎 File unggahan lokal terpilih: ' + file.name, 'info');
     }
 
     function clearG2File() {
