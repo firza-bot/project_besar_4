@@ -173,7 +173,7 @@
             const errorEl = document.getElementById('error-message');
 
             try {
-                const res = await fetch('/api/auth/register', {
+                const res = await fetch('/creation/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, email, password })

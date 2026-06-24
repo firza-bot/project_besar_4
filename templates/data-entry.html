@@ -804,7 +804,7 @@
             }
 
             try {
-                const res = await fetch('/api/submissions/list/');
+                const res = await fetch('/creation/api/submissions/list/');
                 const data = await res.json();
 
                 if (!data.success) throw new Error(data.error || 'Gagal memuat data');
@@ -955,7 +955,7 @@
         }
 
         async function logout() {
-            try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (e) { }
+            try { await fetch('/creation/api/auth/logout', { method: 'POST' }); } catch (e) { }
             try { localStorage.removeItem('ic_profile'); } catch (e) { }
             window.location.href = '/creation/login.html';
         }

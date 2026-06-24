@@ -538,7 +538,7 @@
         async function logoutLanding(event) {
             if (event) event.preventDefault();
             try {
-                await fetch('/api/auth/logout', { method: 'POST' });
+                await fetch('/creation/api/auth/logout', { method: 'POST' });
             } catch (e) { }
             try { localStorage.removeItem('ic_profile'); } catch (e) { }
             window.location.reload();

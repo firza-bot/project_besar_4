@@ -174,7 +174,7 @@
         formData.append('dataset', file);
         
         try {
-            const res = await fetch('/api/ml/upload', { method: 'POST', body: formData });
+            const res = await fetch('/creation/api/ml/upload', { method: 'POST', body: formData });
             const data = await res.json();
             
             if (!res.ok) throw new Error(data.error || 'Gagal upload');
@@ -218,7 +218,7 @@
         document.getElementById('rec-container').style.display = 'none';
         
         try {
-            const res = await fetch('/api/ml/recommend', { 
+            const res = await fetch('/creation/api/ml/recommend', { 
                 method: 'POST', 
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ file_path: currentData.filePath, target_column: target })
@@ -270,7 +270,7 @@
         document.getElementById('step-3').scrollIntoView({behavior: 'smooth'});
         
         try {
-            const res = await fetch('/api/ml/train', { 
+            const res = await fetch('/creation/api/ml/train', { 
                 method: 'POST', 
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ 
