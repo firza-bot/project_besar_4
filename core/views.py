@@ -1301,7 +1301,16 @@ def api_request_to_datago(request):
         data = json.loads(request.body)
         submission_id = data.get('submission_id')
         from .models import IntelligenceSubmission
-        sub = IntelligenceSubmission.objects.get(id=submission_id)
+        if submission_id:
+            sub = IntelligenceSubmission.objects.get(id=submission_id)
+        else:
+            sub = IntelligenceSubmission.objects.create(
+                title=data.get('title') or 'Request Datago (Standalone)',
+                description=data.get('description', ''),
+                sender_email=data.get('contact', ''),
+                stage=2, # Grid 2
+                status='pending'
+            )
         payload = {
             'ic_submission_id': sub.id,
             'title': data.get('title') or sub.title,

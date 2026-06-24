@@ -6466,11 +6466,17 @@
         const countEl = document.getElementById('g2-send-count');
 
         if (reqBtn) {
-            reqBtn.disabled = !(hasSelected && !hasSourceFile && !hasFile);
+            // Standalone mode: ALWAYS enabled if no item is selected.
+            // If an item IS selected, it's enabled ONLY if the item has NO file yet.
+            if (!hasSelected) {
+                reqBtn.disabled = false;
+            } else {
+                reqBtn.disabled = (hasSourceFile || hasFile);
+            }
         }
 
         if (sendBtn) {
-            if (hasFile || hasSourceFile) {
+            if (hasSelected && (hasFile || hasSourceFile)) {
                 sendBtn.disabled = false;
                 if (countEl) countEl.textContent = '1';
             } else {
@@ -6614,19 +6620,16 @@
         const minrowInput = document.getElementById('g2-form-minrow');
         const reqcolsInput = document.getElementById('g2-form-reqcols');
 
+        const inputs = [titleInput, descTextarea, contactInput, urgencySelect, minrowInput, reqcolsInput];
+
         const fileBox = document.getElementById('g2-file-box');
         const fileNameEl = document.getElementById('g2-file-name');
 
         if (!item) {
-            if (titleInput) titleInput.value = "";
-            if (descTextarea) descTextarea.value = "";
-            if (contactInput) contactInput.value = "";
-            if (urgencySelect) urgencySelect.value = "medium";
-            if (minrowInput) minrowInput.value = "";
-            if (reqcolsInput) reqcolsInput.value = "";
             if (fileBox) {
                 fileBox.classList.remove('has-file');
-                fileBox.querySelector('.g2-file-box-icon').textContent = '📄';
+                const icon = fileBox.querySelector('.g2-file-box-icon');
+                if (icon) icon.textContent = '📄';
             }
             if (fileNameEl) {
                 fileNameEl.classList.remove('active');
@@ -6635,15 +6638,34 @@
             return;
         }
 
-        if (titleInput) titleInput.value = item.title || "";
-        if (descTextarea) descTextarea.value = item.description || "";
-        if (contactInput) contactInput.value = item.sender_email || "";
-        if (urgencySelect) urgencySelect.value = "medium";
+        try {
+            if (titleInput) titleInput.value = item.title || "";
+            if (descTextarea) descTextarea.value = item.description || "";
+            if (contactInput) contactInput.value = item.sender_email || "";
+            if (urgencySelect) urgencySelect.value = "medium";
 
-        const meta = item.extra_metadata || {};
-        if (minrowInput) minrowInput.value = meta.min_rows || meta.minrow || "";
-        
-        const reqCols = meta.required_columns || meta.required_column || "";
+            let meta = item.extra_metadata || {};
+            if (typeof meta === 'string') {
+                try { meta = JSON.parse(meta); } catch(e) { meta = {}; }
+            }
+            if (minrowInput) minrowInput.value = meta.min_rows || meta.minrow || "";
+            
+            const reqCols = meta.required_columns || meta.required_column || "";
+            if (reqcolsInput) reqcolsInput.value = Array.isArray(reqCols) ? reqCols.join(', ') : reqCols;
+        } catch (err) {
+            console.error('Error populating grid 2 form:', err);
+        }
+
+        if (fileBox) {
+            fileBox.classList.add('has-file');
+            const icon = fileBox.querySelector('.g2-file-box-icon');
+            if (icon) icon.textContent = '📄';
+        }
+        if (fileNameEl) {
+            fileNameEl.classList.add('active');
+            fileNameEl.textContent = (item.file_name || 'Dataset API') + ' (API)';
+        }
+    }        const reqCols = meta.required_columns || meta.required_column || "";
         if (reqcolsInput) reqcolsInput.value = Array.isArray(reqCols) ? reqCols.join(', ') : reqCols;
 
         if (fileBox) {
@@ -6679,9 +6701,6 @@
     }
 
     async function handleRequestDataset() {
-        if (pipelineState.grid1Selected.length === 0) return;
-        const targetId = pipelineState.grid1Selected[0];
-
         const titleVal = document.getElementById('g2-form-title')?.value.trim() || 'Tanpa Judul';
         const descVal = document.getElementById('g2-form-desc')?.value.trim() || '';
         const contactVal = document.getElementById('g2-form-contact')?.value.trim() || '';
@@ -6692,28 +6711,32 @@
         try {
             const csrfToken = getCookie('csrftoken') || '';
 
-            // Step A: Save edits via PATCH request
-            await fetch(`/creation/api/v2/submissions/${targetId}/`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({
-                    title: titleVal,
-                    description: descVal,
-                    sender_email: contactVal,
-                    extra_metadata: {
-                        min_rows: minRowVal,
-                        required_columns: reqColsVal
-                    }
-                })
-            });
-
             const reqBtn = document.getElementById('g2-req-btn');
             if (reqBtn) {
                 reqBtn.disabled = true;
                 reqBtn.textContent = 'Meminta...';
+            }
+
+            const targetId = pipelineState.grid1Selected.length > 0 ? pipelineState.grid1Selected[0] : null;
+
+            // Step A: Save edits via PATCH request if we are editing an existing queue item
+            if (targetId) {
+                await fetch(`/creation/api/v2/submissions/${targetId}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        title: titleVal,
+                        description: descVal,
+                        sender_email: contactVal,
+                        extra_metadata: {
+                            min_rows: minRowVal,
+                            required_columns: reqColsVal
+                        }
+                    })
+                });
             }
 
             const reqRes = await fetch(`/creation/api/datago/request/`, {
@@ -6723,18 +6746,23 @@
                     'X-CSRFToken': csrfToken
                 },
                 body: JSON.stringify({
-                    submission_id: targetId,
+                    submission_id: targetId, // Can be null if standalone
                     title: titleVal,
                     description: descVal,
-                    contact: contactVal,
                     urgency: urgencyVal,
+                    contact: contactVal,
                     min_rows: minRowVal,
                     required_columns: reqColsVal
                 })
             });
             
             if (reqRes.ok) {
-                showToast('✅ Permintaan berhasil dikirim ke Tim Dataset!', 'success');
+                showToast('✔ Permintaan berhasil dikirim ke Tim Dataset!', 'success');
+                if (!targetId) {
+                    // Clear form for new standalone requests
+                    const els = ['g2-form-title', 'g2-form-desc', 'g2-form-contact', 'g2-form-minrow', 'g2-form-reqcols'];
+                    els.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+                }
                 await loadPipelineData(); // reload so UI is fresh
             } else {
                 const err = await reqRes.json();
