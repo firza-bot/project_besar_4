@@ -6305,7 +6305,7 @@
     async function deleteProject(id) {
         if (!confirm('Apakah Anda yakin ingin menghapus project ini?')) return;
         try {
-            const csrfToken = getCookie('csrftoken');
+            const csrfToken = getCookie('csrftoken') || '';
             const res = await fetch(`/api/v2/collaboration/${id}/`, {
                 method: 'DELETE',
                 headers: {
@@ -6363,7 +6363,7 @@
         const visibility = document.getElementById('proj-visibility').value;
         
         try {
-            const csrfToken = getCookie('csrftoken');
+            const csrfToken = getCookie('csrftoken') || '';
             const res = await fetch('/api/v2/collaboration/', {
                 method: 'POST',
                 headers: {
@@ -6480,7 +6480,7 @@
         formData.append('urgency', urgensi);
         formData.append('sender_name', document.getElementById('user-name')?.textContent.trim() || 'User');
         formData.append('sender_team', 'Manual Entry');
-        const csrfToken = getCookie('csrftoken');
+        const csrfToken = getCookie('csrftoken') || '';
         try {
             const btn = document.getElementById('g2-send-btn');
             if (btn) {
@@ -6606,7 +6606,7 @@
         const targetId = pipelineState.grid1Selected[0];
         
         try {
-            const csrfToken = getCookie('csrftoken');
+            const csrfToken = getCookie('csrftoken') || '';
             const res = await fetch(`/api/v2/submissions/${targetId}/approve_stage/`, {
                 method: 'POST',
                 headers: {
@@ -6645,7 +6645,7 @@
             const res = await fetch(`/api/v2/submissions/${activeSub.id}/`, {
                 method: 'DELETE',
                 headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
+                    'X-CSRFToken': getCookie('csrftoken') || ''
                 }
             });
             if (res.ok) {
@@ -6787,7 +6787,7 @@
         }
 
         try {
-            const csrfToken = typeof getCookie === 'function' ? getCookie('csrftoken') : getCsrfToken();
+            const csrfToken = (typeof getCookie === 'function' ? getCookie('csrftoken') : null) || '';
             const res = await fetch(`/api/v2/submissions/${activeSubmissionId}/`, {
                 method: 'PATCH',
                 headers: {
@@ -6858,7 +6858,7 @@
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCsrfToken()
+                'X-CSRFToken': getCookie('csrftoken') || ''
             },
             body: JSON.stringify({ pipeline_data: {}, current_stage: 0 })
         }).then(() => {
@@ -7273,7 +7273,7 @@
         btn.disabled = true;
         
         try {
-            const csrfToken = getCookie('csrftoken');
+            const csrfToken = getCookie('csrftoken') || '';
             const res = await fetch(`/api/v2/submissions/${activeSubmissionId}/approve_stage/`, {
                 method: 'POST',
                 headers: {
@@ -7328,7 +7328,7 @@
         }
         
         try {
-            const csrfToken = getCookie('csrftoken');
+            const csrfToken = getCookie('csrftoken') || '';
             const res = await fetch(`/api/v2/submissions/${activeSubmissionId}/run_stage/`, {
                 method: 'POST',
                 headers: {
@@ -7376,7 +7376,7 @@
         btn.disabled = true;
         
         try {
-            const csrfToken = getCookie('csrftoken');
+            const csrfToken = getCookie('csrftoken') || '';
             const res = await fetch(`/api/v2/submissions/${activeSubmissionId}/approve_stage/`, {
                 method: 'POST',
                 headers: {
@@ -7707,10 +7707,38 @@
         });
     }
 
-    function deleteGrid4Item(idx) {
-        if(confirm('Apakah Anda yakin ingin menghapus data ini dari daftar pipeline Grid 4?')) {
-            pipelineState.grid3Data.splice(idx, 1);
-            renderGrid4State();
+    async function deleteGrid4Item(idx) {
+        const d = pipelineState.grid3Data;
+        if (!d || d.length === 0 || !d[idx]) return;
+        const activeSub = d[idx];
+        if (confirm('Apakah Anda yakin ingin menghapus data ini dari daftar pipeline Grid 4 secara permanen?')) {
+            try {
+                const csrfToken = getCookie('csrftoken') || '';
+                const res = await fetch(`/api/v2/submissions/${activeSub.id}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    }
+                });
+                if (res.ok) {
+                    showToast('✓ Data berhasil dihapus.', 'success');
+                    await loadPipelineData();
+                } else {
+                    let errMsg = 'Gagal menghapus data.';
+                    try {
+                        const errData = await res.json();
+                        errMsg += ': ' + JSON.stringify(errData);
+                    } catch(e) {
+                        try {
+                            const errText = await res.text();
+                            errMsg += ': ' + errText;
+                        } catch(e2) {}
+                    }
+                    showToast(errMsg, 'error');
+                }
+            } catch (e) {
+                showToast('Error: ' + e.message, 'error');
+            }
         }
     }
 
@@ -8343,7 +8371,7 @@
         }
         
         try {
-            const csrfToken = getCookie('csrftoken');
+            const csrfToken = getCookie('csrftoken') || '';
             const res = await fetch(`/api/v2/submissions/${targetId}/`, {
                 method: 'PATCH',
                 headers: {
@@ -8357,17 +8385,31 @@
             });
             if (res.ok) {
                 showToast(`🚀 Model berhasil dikirim ke Kelompok Implementasi!`, 'success');
-                if (newWindow && jobId) {
-                    newWindow.location.href = `/api/train/pdf-report/${jobId}`;
-                } else if (newWindow) {
-                    newWindow.close();
-                    setTimeout(() => showToast('Catatan: Grafik PDF tidak tersedia (Job ID tidak ditemukan)', 'warning'), 1500);
+                if (jobId) {
+                    if (newWindow) {
+                        newWindow.location.href = `/api/train/pdf-report/${jobId}`;
+                    } else {
+                        window.open(`/api/train/pdf-report/${jobId}`, '_blank');
+                    }
+                } else {
+                    if (newWindow) newWindow.close();
+                    printComprehensiveReport(0);
                 }
                 closePipelineModal('pm-overlay-final');
                 await loadPipelineData();
             } else {
                 if (newWindow) newWindow.close();
-                showToast('Gagal mengirim data final', 'error');
+                let errMsg = 'Gagal mengirim data final';
+                try {
+                    const errData = await res.json();
+                    errMsg += ': ' + JSON.stringify(errData);
+                } catch(e) {
+                    try {
+                        const errText = await res.text();
+                        errMsg += ': ' + errText;
+                    } catch(e2) {}
+                }
+                showToast(errMsg, 'error');
             }
         } catch (e) {
             if (newWindow) newWindow.close();
@@ -8566,7 +8608,7 @@
         btn.disabled = true;
         
         try {
-            const csrfToken = getCookie('csrftoken');
+            const csrfToken = getCookie('csrftoken') || '';
             const res = await fetch(`/api/v2/submissions/${activePlaygroundSubId}/predict/`, {
                 method: 'POST',
                 headers: {
