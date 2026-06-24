@@ -42,7 +42,7 @@
         try {
             // Check IntringPM Status
             try {
-                const statusRes = await fetch('/api/intring_status/');
+                const statusRes = await fetch('/creation/api/intring_status/');
                 if (statusRes.ok) {
                     const statusData = await statusRes.json();
                     const btn = document.getElementById('buka-project-btn');
@@ -61,7 +61,7 @@
 
             // Load projects from UIUX API
             try {
-                const projRes = await fetch('/api/ic_projects/');
+                const projRes = await fetch('/creation/api/ic_projects/');
                 if (projRes.ok) {
                     const projData = await projRes.json();
                     pipelineState.projects = projData;
@@ -70,7 +70,7 @@
                 console.error("Error loading projects:", e);
             }
 
-            const res = await fetch('/api/submissions/list/');
+            const res = await fetch('/creation/api/submissions/list/');
             const data = await res.json();
             if (!data.success) throw new Error(data.error || 'Gagal memuat');
             
@@ -268,7 +268,7 @@
         if (!confirm('Apakah Anda yakin ingin menghapus project ini?')) return;
         try {
             const csrfToken = getCookie('csrftoken') || '';
-            const res = await fetch(`/api/v2/collaboration/${id}/`, {
+            const res = await fetch(`/creation/api/v2/collaboration/${id}/`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRFToken': csrfToken
@@ -326,7 +326,7 @@
         
         try {
             const csrfToken = getCookie('csrftoken') || '';
-            const res = await fetch('/api/v2/collaboration/', {
+            const res = await fetch('/creation/api/v2/collaboration/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -449,7 +449,7 @@
                 btn.disabled = true;
                 btn.innerHTML = '⏳ Mengunggah...';
             }
-            const res = await fetch('/api/v2/submissions/', {
+            const res = await fetch('/creation/api/v2/submissions/', {
                 method: 'POST',
                 headers: { 'X-CSRFToken': csrfToken },
                 body: formData
@@ -457,7 +457,7 @@
             const data = await res.json();
             if (res.ok) {
                 // Auto-approve ke Grid 3
-                const approveRes = await fetch(`/api/v2/submissions/${data.id}/approve_stage/`, {
+                const approveRes = await fetch(`/creation/api/v2/submissions/${data.id}/approve_stage/`, {
                     method: 'POST',
                     headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
                     body: JSON.stringify({})
@@ -608,7 +608,7 @@
             const csrfToken = getCookie('csrftoken') || '';
             
             // Step A: Save edits via PATCH request
-            await fetch(`/api/v2/submissions/${targetId}/`, {
+            await fetch(`/creation/api/v2/submissions/${targetId}/`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -626,7 +626,7 @@
             });
 
             // Step B: Approve stage via POST request
-            const res = await fetch(`/api/v2/submissions/${targetId}/approve_stage/`, {
+            const res = await fetch(`/creation/api/v2/submissions/${targetId}/approve_stage/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -661,7 +661,7 @@
         
         if (!activeSub) return;
         try {
-            const res = await fetch(`/api/v2/submissions/${activeSub.id}/`, {
+            const res = await fetch(`/creation/api/v2/submissions/${activeSub.id}/`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRFToken': getCookie('csrftoken') || ''
@@ -807,7 +807,7 @@
 
         try {
             const csrfToken = (typeof getCookie === 'function' ? getCookie('csrftoken') : null) || '';
-            const res = await fetch(`/api/v2/submissions/${activeSubmissionId}/`, {
+            const res = await fetch(`/creation/api/v2/submissions/${activeSubmissionId}/`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -873,7 +873,7 @@
         pipelineState.grid2Stages[0].status = 'active';
         
         // Reset backend pipeline data manually by saving an empty object for stage 0
-        fetch(`/api/v2/submissions/${activeSubmissionId}/`, {
+        fetch(`/creation/api/v2/submissions/${activeSubmissionId}/`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -1293,7 +1293,7 @@
         
         try {
             const csrfToken = getCookie('csrftoken') || '';
-            const res = await fetch(`/api/v2/submissions/${activeSubmissionId}/approve_stage/`, {
+            const res = await fetch(`/creation/api/v2/submissions/${activeSubmissionId}/approve_stage/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1348,7 +1348,7 @@
         
         try {
             const csrfToken = getCookie('csrftoken') || '';
-            const res = await fetch(`/api/v2/submissions/${activeSubmissionId}/run_stage/`, {
+            const res = await fetch(`/creation/api/v2/submissions/${activeSubmissionId}/run_stage/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1396,7 +1396,7 @@
         
         try {
             const csrfToken = getCookie('csrftoken') || '';
-            const res = await fetch(`/api/v2/submissions/${activeSubmissionId}/approve_stage/`, {
+            const res = await fetch(`/creation/api/v2/submissions/${activeSubmissionId}/approve_stage/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1559,7 +1559,7 @@
         
         if (jobId) {
             try {
-                const response = await fetch(`/api/train/result/${jobId}`);
+                const response = await fetch(`/creation/api/train/result/${jobId}`);
                 if (response.ok) {
                     const result = await response.json();
                     renderAutoMLDashboardModal(activeSub, result, jobId);
@@ -1733,7 +1733,7 @@
         if (confirm('Apakah Anda yakin ingin menghapus data ini dari daftar pipeline Grid 4 secara permanen?')) {
             try {
                 const csrfToken = getCookie('csrftoken') || '';
-                const res = await fetch(`/api/v2/submissions/${activeSub.id}/`, {
+                const res = await fetch(`/creation/api/v2/submissions/${activeSub.id}/`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRFToken': csrfToken
@@ -2406,7 +2406,7 @@
         
         try {
             const csrfToken = getCookie('csrftoken') || '';
-            const res = await fetch(`/api/v2/submissions/${targetId}/`, {
+            const res = await fetch(`/creation/api/v2/submissions/${targetId}/`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2646,7 +2646,7 @@
         
         try {
             const csrfToken = getCookie('csrftoken') || '';
-            const res = await fetch(`/api/v2/submissions/${activePlaygroundSubId}/predict/`, {
+            const res = await fetch(`/creation/api/v2/submissions/${activePlaygroundSubId}/predict/`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': csrfToken

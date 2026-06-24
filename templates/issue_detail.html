@@ -252,7 +252,7 @@
                                 File saat ini:<br>
                                 {% for att in attachments %}
                                 <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:0.5rem; margin-top:0.5rem; border-radius:0.25rem;">
-                                    <a href="/media/{{ att.file }}" target="_blank" style="color:var(--primary); text-decoration:none;">{{ att.original_name }}</a>
+                                    <a href="/creation/media/{{ att.file }}" target="_blank" style="color:var(--primary); text-decoration:none;">{{ att.original_name }}</a>
                                     <button type="submit" name="delete_attachment" value="{{ att.id }}" class="btn-primary" style="background:#ef4444; padding:0.2rem 0.5rem; font-size:0.8rem;">Hapus</button>
                                 </div>
                                 {% endfor %}

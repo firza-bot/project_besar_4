@@ -279,7 +279,7 @@
         // =====================================================================
         async function loadStats() {
             try {
-                const res = await fetch('/api/stats');
+                const res = await fetch('/creation/api/stats');
                 const result = await res.json();
                 const stats = result.stats || {};
                 FEATURES.forEach(f => {
@@ -312,7 +312,7 @@
 
         function openFeature(key) {
             if (key === 'training-testing') {
-                window.location.href = '/ml_pipeline.html';
+                window.location.href = '/creation/ml_pipeline.html';
                 return;
             }
 
@@ -440,12 +440,12 @@
         // =====================================================================
         async function logout() {
             try {
-                await fetch('/api/auth/logout', { method: 'POST' });
+                await fetch('/creation/api/auth/logout', { method: 'POST' });
             } catch (e) { }
             // Hapus semua data lokal agar tidak ada sisa session di browser
             try { localStorage.removeItem('ic_profile'); } catch (e) { }
             // Redirect ke halaman login (bukan landing page)
-            window.location.href = '/login.html';
+            window.location.href = '/creation/login.html';
         }
 
         // =====================================================================
@@ -771,7 +771,7 @@
             formData.append('file', file);
 
             try {
-                const res = await fetch('/api/ml/framing', { method: 'POST', body: formData });
+                const res = await fetch('/creation/api/ml/framing', { method: 'POST', body: formData });
                 const contentType = res.headers.get("content-type");
 
                 if (!contentType || !contentType.includes("application/json")) {
@@ -1201,7 +1201,7 @@
 
         async function fetchUserProfile() {
             try {
-                const res = await fetch('/api/auth/me');
+                const res = await fetch('/creation/api/auth/me');
                 if (res.ok) {
                     const data = await res.json();
                     if (data.user) {

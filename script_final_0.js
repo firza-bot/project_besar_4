@@ -1,7 +1,7 @@
 
     window.loadIssues = async function(projectId, projectName) {
         try {
-            const res = await fetch('/api/projects/' + projectId + '/issues');
+            const res = await fetch('/creation/api/projects/' + projectId + '/issues');
             const data = await res.json();
             const c = document.getElementById('g2-inbox-mini');
             document.getElementById('g2-total').textContent = data.issues.length;
