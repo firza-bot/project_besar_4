@@ -1184,6 +1184,7 @@ def api_submissions_list(request):
                 'received_at': received_at.isoformat(),
                 'time_relative': time_relative,
                 'pipeline_data': getattr(sub, 'pipeline_data', {}) or {},
+                'extra_metadata': getattr(sub, 'extra_metadata', {}) or {},
                 'file_path': file_path,
                 'file_url': file_url,
             })

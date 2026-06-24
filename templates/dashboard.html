@@ -4040,26 +4040,37 @@
 
                     <hr class="g2-form-separator">
 
-                    <form class="g2-form" onsubmit="event.preventDefault();" style="background: #1a1435; padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                    <form class="g2-form" id="g2-form" onsubmit="event.preventDefault();" style="background: #1a1435; padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
                         <div class="g2-form-group">
                             <label class="g2-form-label">Judul</label>
-                            <input class="g2-form-input" type="text" placeholder="Contoh: Data Penjualan Q3 2026">
+                            <input class="g2-form-input" id="g2-form-title" type="text" placeholder="Contoh: Data Penjualan Q3 2026">
                         </div>
                         <div class="g2-form-group">
                             <label class="g2-form-label">Deskripsi</label>
-                            <textarea class="g2-form-textarea" placeholder="Jelaskan kebutuhan data, kolom yang diperlukan, dan wilayah terkait..."></textarea>
+                            <textarea class="g2-form-textarea" id="g2-form-desc" placeholder="Jelaskan kebutuhan data, kolom yang diperlukan, dan wilayah terkait..."></textarea>
                         </div>
                         <div class="g2-form-group">
                             <label class="g2-form-label">Kontak</label>
-                            <input class="g2-form-input" type="email" placeholder="email@tim.com">
+                            <input class="g2-form-input" id="g2-form-contact" type="email" placeholder="email@tim.com">
                         </div>
                         <div class="g2-form-group">
                             <label class="g2-form-label">Urgensi</label>
-                            <select class="g2-form-select">
+                            <select class="g2-form-select" id="g2-form-urgency">
                                 <option value="high">High Priority</option>
                                 <option value="medium" selected>Medium Priority</option>
                                 <option value="low">Low Priority</option>
                             </select>
+                        </div>
+                        <!-- New Fields Added -->
+                        <div style="display:flex; gap:12px;">
+                            <div class="g2-form-group" style="flex:1;">
+                                <label class="g2-form-label">Min Row</label>
+                                <input class="g2-form-input" id="g2-form-minrow" type="number" placeholder="Contoh: 1000">
+                            </div>
+                            <div class="g2-form-group" style="flex:2;">
+                                <label class="g2-form-label">Required Columns</label>
+                                <input class="g2-form-input" id="g2-form-reqcols" type="text" placeholder="Contoh: name, email, age">
+                            </div>
                         </div>
                     </form>
 
@@ -4080,8 +4091,6 @@
                     </div>
 
                     <div class="pg-actions">
-                        <input type="file" id="g2-file-upload" style="display:none;" onchange="handleGrid2Upload(event)" />
-                        <button class="pg-btn-secondary" onclick="document.getElementById('g2-file-upload').click()">📁 Unggah File</button>
                         <button class="pg-btn-primary" id="g2-send-btn" onclick="handleG2SendBtn()" disabled>
                             Kirim ke Proses → <span class="pg-send-count" id="g2-send-count">0</span>
                         </button>
@@ -6423,15 +6432,21 @@
 
     function clearG2File() {
         g2SelectedFile = null;
-        document.getElementById('g2-file-upload').value = '';
+        const uploadEl = document.getElementById('g2-file-upload');
+        if (uploadEl) uploadEl.value = '';
         const box = document.getElementById('g2-file-box');
         const nameEl = document.getElementById('g2-file-name');
-        box.classList.remove('has-file');
-        box.querySelector('.g2-file-box-icon').textContent = '📄';
-        nameEl.classList.remove('active');
-        nameEl.textContent = 'Belum ada file yang diunggah';
-        const clearBtn = box.querySelector('.g2-file-clear-btn');
-        if (clearBtn) clearBtn.remove();
+        if (box) {
+            box.classList.remove('has-file');
+            const icon = box.querySelector('.g2-file-box-icon');
+            if (icon) icon.textContent = '📄';
+            const clearBtn = box.querySelector('.g2-file-clear-btn');
+            if (clearBtn) clearBtn.remove();
+        }
+        if (nameEl) {
+            nameEl.classList.remove('active');
+            nameEl.textContent = 'Belum ada file yang dipilih';
+        }
         updateG2SendBtnMode();
     }
 
@@ -6573,7 +6588,61 @@
             const chk = document.getElementById(`chk-${id}`);
             if (chk) { chk.classList.remove('checked'); chk.innerHTML = ''; }
         }
+        updateGrid2SelectedDetails();
         updateGrid2SendBtn();
+    }
+
+    function updateGrid2SelectedDetails() {
+        const targetId = pipelineState.grid1Selected[0];
+        const item = pipelineState.grid1Data ? pipelineState.grid1Data.find(s => s.id === targetId) : null;
+        
+        const titleInput = document.getElementById('g2-form-title');
+        const descTextarea = document.getElementById('g2-form-desc');
+        const contactInput = document.getElementById('g2-form-contact');
+        const urgencySelect = document.getElementById('g2-form-urgency');
+        const minrowInput = document.getElementById('g2-form-minrow');
+        const reqcolsInput = document.getElementById('g2-form-reqcols');
+
+        const fileBox = document.getElementById('g2-file-box');
+        const fileNameEl = document.getElementById('g2-file-name');
+
+        if (!item) {
+            if (titleInput) titleInput.value = "";
+            if (descTextarea) descTextarea.value = "";
+            if (contactInput) contactInput.value = "";
+            if (urgencySelect) urgencySelect.value = "medium";
+            if (minrowInput) minrowInput.value = "";
+            if (reqcolsInput) reqcolsInput.value = "";
+            if (fileBox) {
+                fileBox.classList.remove('has-file');
+                fileBox.querySelector('.g2-file-box-icon').textContent = '📄';
+            }
+            if (fileNameEl) {
+                fileNameEl.classList.remove('active');
+                fileNameEl.textContent = 'Belum ada file yang dipilih';
+            }
+            return;
+        }
+
+        if (titleInput) titleInput.value = item.title || "";
+        if (descTextarea) descTextarea.value = item.description || "";
+        if (contactInput) contactInput.value = item.sender_email || "";
+        if (urgencySelect) urgencySelect.value = "medium";
+
+        const meta = item.extra_metadata || {};
+        if (minrowInput) minrowInput.value = meta.min_rows || meta.minrow || "";
+        
+        const reqCols = meta.required_columns || meta.required_column || "";
+        if (reqcolsInput) reqcolsInput.value = Array.isArray(reqCols) ? reqCols.join(', ') : reqCols;
+
+        if (fileBox) {
+            fileBox.classList.add('has-file');
+            fileBox.querySelector('.g2-file-box-icon').textContent = '📦';
+        }
+        if (fileNameEl) {
+            fileNameEl.classList.add('active');
+            fileNameEl.textContent = (item.file_name || 'Dataset API') + ' (API)';
+        }
     }
 
     function updateGrid2SendBtn() {
@@ -6589,12 +6658,12 @@
     // --- GRID 2 → 3 ---
     function openSendToGrid3Modal() {
         if (pipelineState.grid1Selected.length === 0) return;
-        const sel = pipelineState.grid1Data.filter(s => pipelineState.grid1Selected.includes(s.id));
+        const titleVal = document.getElementById('g2-form-title')?.value.trim() || 'Tanpa Judul';
         document.getElementById('pm-summary-2to3').innerHTML = `
-            <div class="pm-summary-row"><span>Jumlah Data</span><span>${sel.length} item</span></div>
+            <div class="pm-summary-row"><span>Jumlah Data</span><span>1 item</span></div>
             <div class="pm-summary-row"><span>Dari</span><span>Grid 2 — Menerima Data Project</span></div>
             <div class="pm-summary-row"><span>Tujuan</span><span>Grid 3 — Proses Data Entry</span></div>
-            <div class="pm-summary-row"><span>Judul</span><span>${sel.map(s=>s.title).join(', ').substring(0,50)}</span></div>`;
+            <div class="pm-summary-row"><span>Judul</span><span>${titleVal}</span></div>`;
         document.getElementById('pm-overlay-2to3').classList.add('active');
     }
 
@@ -6602,8 +6671,34 @@
         if (pipelineState.grid1Selected.length === 0) return;
         const targetId = pipelineState.grid1Selected[0];
         
+        const titleVal = document.getElementById('g2-form-title')?.value.trim() || 'Tanpa Judul';
+        const descVal = document.getElementById('g2-form-desc')?.value.trim() || '';
+        const contactVal = document.getElementById('g2-form-contact')?.value.trim() || '';
+        const minRowVal = document.getElementById('g2-form-minrow')?.value.trim() || '';
+        const reqColsVal = document.getElementById('g2-form-reqcols')?.value.trim() || '';
+        
         try {
             const csrfToken = getCookie('csrftoken') || '';
+            
+            // Step A: Save edits via PATCH request
+            await fetch(`/api/v2/submissions/${targetId}/`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    title: titleVal,
+                    description: descVal,
+                    sender_email: contactVal,
+                    extra_metadata: {
+                        min_rows: minRowVal,
+                        required_columns: reqColsVal
+                    }
+                })
+            });
+
+            // Step B: Approve stage via POST request
             const res = await fetch(`/api/v2/submissions/${targetId}/approve_stage/`, {
                 method: 'POST',
                 headers: {
