@@ -109,6 +109,7 @@ def issue_full_detail_page(request, issue_id):
         if 'evidence_file' in request.FILES:
             upload = request.FILES['evidence_file']
             if upload.size > 0:
+                upload.seek(0)
                 file_content = upload.read()
                 upload.seek(0)
                 c_status.evidence_file = upload
