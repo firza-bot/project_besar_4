@@ -1593,6 +1593,9 @@ def api_pdf_report(request, job_id):
                 </div>
             </div>
         </div>
+    """
+
+    js_code = """
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             const processedRows = %s;
@@ -1638,6 +1641,8 @@ def api_pdf_report(request, job_id):
     </body>
     </html>
     """ % (df_json_str)
+
+    html += js_code
     
     response = HttpResponse(html, content_type='text/html')
     response['Content-Disposition'] = f'inline; filename="automl_report_{job_id}.html"'

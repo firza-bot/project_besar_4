@@ -8322,12 +8322,20 @@
         if (pipelineState.grid4Ready.length === 0) return;
         const targetId = pipelineState.grid4Ready[0].id;
         
-        const pd = pipelineState.grid4Ready[0].pipeline_data || {};
+        let pd = pipelineState.grid4Ready[0].pipeline_data || {};
+        if (typeof pd === 'string') {
+            try { pd = JSON.parse(pd); } catch(e) {}
+        }
         let jobId = null;
         if (pd.stage_7 && pd.stage_7.job_id) {
             jobId = pd.stage_7.job_id;
         } else if (pd['7'] && pd['7'].job_id) {
             jobId = pd['7'].job_id;
+        }
+
+        let newWindow = null;
+        if (jobId) {
+            newWindow = window.open('', '_blank');
         }
         
         try {
@@ -8345,15 +8353,17 @@
             });
             if (res.ok) {
                 showToast(`🚀 Model berhasil dikirim ke Kelompok Implementasi!`, 'success');
-                if (jobId) {
-                    window.open(`/api/train/pdf-report/${jobId}`, '_blank');
+                if (newWindow && jobId) {
+                    newWindow.location.href = `/api/train/pdf-report/${jobId}`;
                 }
                 closePipelineModal('pm-overlay-final');
                 await loadPipelineData();
             } else {
+                if (newWindow) newWindow.close();
                 showToast('Gagal mengirim data final', 'error');
             }
         } catch (e) {
+            if (newWindow) newWindow.close();
             showToast('Gagal: ' + e.message, 'error');
         }
     }
