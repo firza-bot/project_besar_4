@@ -108,11 +108,18 @@ def issue_full_detail_page(request, issue_id):
         files = {}
         if 'evidence_file' in request.FILES:
             upload = request.FILES['evidence_file']
-            file_content = upload.read()
-            upload.seek(0)
-            c_status.evidence_file = upload
+            if upload.size > 0:
+                file_content = upload.read()
+                upload.seek(0)
+                c_status.evidence_file = upload
+                c_status.save()
+                files = {'evidence_file': (upload.name, file_content, upload.content_type)}
+
+        delete_ev = False
+        if request.POST.get('delete_attachment'):
+            c_status.evidence_file = None
             c_status.save()
-            files = {'evidence_file': (upload.name, file_content, upload.content_type)}
+            delete_ev = True
             
         new_category = request.POST.get('new_orch_category')
         if new_category:
@@ -135,6 +142,8 @@ def issue_full_detail_page(request, issue_id):
             'development_constraints': c_status.development_constraints,
             'orchestrations': json.dumps(orch_list)
         }
+        if delete_ev:
+            post_data['delete_evidence'] = 'true'
         
         try:
             requests.post(f"{INTRING_API_URL}/integration/ic-issues/{issue_id}/update", data=post_data, files=files, params={'token': INTRING_SECRET}, timeout=10)
