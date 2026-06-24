@@ -4078,12 +4078,17 @@
                     <div class="g2-form-group" style="margin: 6px 0 0 0;">
                         <label class="g2-form-label" style="font-size:0.68rem; color:rgba(255,255,255,0.45);">File untuk Diproses</label>
                         <input type="file" id="g2-file-upload" style="display:none;" onchange="handleG2ManualFileUpload(event)">
-                        <div class="g2-file-box" id="g2-file-box" style="cursor: pointer;" onclick="document.getElementById('g2-file-upload').click()">
-                            <span class="g2-file-box-icon">📄</span>
-                            <div class="g2-file-box-text">
-                                <div class="g2-file-box-label">File terpilih</div>
-                                <div class="g2-file-box-name" id="g2-file-name">Belum ada file yang diunggah (Klik untuk unggah)</div>
+                        <div style="display: flex; gap: 10px; align-items: center; margin-top: 4px;">
+                            <div class="g2-file-box" id="g2-file-box" style="flex: 1; margin: 0;">
+                                <span class="g2-file-box-icon">📄</span>
+                                <div class="g2-file-box-text">
+                                    <div class="g2-file-box-label">File terpilih</div>
+                                    <div class="g2-file-box-name" id="g2-file-name">Belum ada file yang diunggah</div>
+                                </div>
                             </div>
+                            <button type="button" class="pg-btn-secondary" onclick="document.getElementById('g2-file-upload').click()" style="padding: 14px 16px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 6px;">
+                                <span>📤</span> Unggah File
+                            </button>
                         </div>
                     </div>
 
