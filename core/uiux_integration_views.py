@@ -120,9 +120,18 @@ def issue_full_detail_page(request, issue_id):
                 status=request.POST.get('new_orch_status', 'in_progress'),
             )
             
+        import json
+        orch_list = list(OrchestrationPhase.objects.filter(uiux_issue_id=issue_id).values('category', 'status', 'start_date', 'end_date', 'created_at'))
+        # Convert datetime to string for json serialization
+        for o in orch_list:
+            if o.get('created_at'): o['created_at'] = o['created_at'].strftime('%d %b %Y')
+            if o.get('start_date'): o['start_date'] = o['start_date'].strftime('%d %b %Y')
+            if o.get('end_date'): o['end_date'] = o['end_date'].strftime('%d %b %Y')
+            
         post_data = {
             'realization_status': c_status.realization_status,
-            'development_constraints': c_status.development_constraints
+            'development_constraints': c_status.development_constraints,
+            'orchestrations': json.dumps(orch_list)
         }
         
         try:
