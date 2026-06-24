@@ -12,8 +12,10 @@ services:
       - SECRET_KEY=ganti_dengan_key_produksi_anda
       - INTRING_API_URL=${INTRING_API_URL:-}
     networks:
-      - django_net
-      - global_gateway_net
+      django_net:
+        aliases:
+          - django_backend
+      global_gateway_net:
 
   nginx:
     image: nginx:alpine
