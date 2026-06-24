@@ -6233,7 +6233,7 @@
         // Setup Full Detail link
         const btn = document.getElementById('summ-full-detail');
         btn.onclick = () => {
-            window.location.href = `/issue/${issue.id}/detail/`;
+            window.location.href = `/creation/issue/${issue.id}/detail/`;
         };
 
         // styling colors based on priority
@@ -6903,7 +6903,7 @@
 
     function openGrid3Detail() {
         if (activeSubmissionId) {
-            window.location.href = `/data-entry/proses/${activeSubmissionId}/`;
+            window.location.href = `/creation/data-entry/proses/${activeSubmissionId}/`;
         } else {
             showToast('Tidak ada data aktif untuk diproses.', 'error');
         }
@@ -8494,9 +8494,9 @@
                 showToast(`🚀 Model berhasil dikirim ke Kelompok Implementasi!`, 'success');
                 if (jobId) {
                     if (reportWindow) {
-                        reportWindow.location.href = `/api/train/pdf-report/${jobId}`;
+                        reportWindow.location.href = `/creation/api/train/pdf-report/${jobId}`;
                     } else {
-                        window.open(`/api/train/pdf-report/${jobId}`, '_blank');
+                        window.open(`/creation/api/train/pdf-report/${jobId}`, '_blank');
                     }
                 } else {
                     if (reportWindow) {
