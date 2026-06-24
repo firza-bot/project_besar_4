@@ -7759,6 +7759,18 @@
             window.open(`/api/train/pdf-report/${jobId}`, '_blank');
             return;
         }
+        
+        let printWin = window.open('', '_blank');
+        if (!printWin) {
+            showToast('Popup blocker aktif. Mohon izinkan popup untuk melihat laporan.', 'warning');
+            return;
+        }
+        writeClientSideReportToWindow(printWin, activeSub);
+    }
+
+    function writeClientSideReportToWindow(printWin, activeSub) {
+        if (!printWin || !activeSub) return;
+        const pd = activeSub.pipeline_data || {};
         const s1 = pd.stage_1 || {};
         const s2 = pd.stage_2 || {};
         const cleaning = s2.cleaning_report || {};
@@ -7780,8 +7792,9 @@
         const now = new Date();
         const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         const createDate = new Date(now.getTime() - 86400000*3).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+        const totalSources = pipelineState.grid3Data ? pipelineState.grid3Data.length : 1;
 
-        let printWin = window.open('', '_blank');
+        printWin.document.open();
         printWin.document.write(`
             <html>
             <head>
@@ -7821,13 +7834,13 @@
                 
                 <div class="meta-box">
                     <div><b>ID Dataset:</b> DS-${Math.floor(Math.random()*1000).toString().padStart(3,'0')} &nbsp;&nbsp;|&nbsp;&nbsp; <b>Tanggal Cetak:</b> ${dateStr}</div>
-                    <div><b>Total Data Source Platform:</b> ${d.length} &nbsp;&nbsp;|&nbsp;&nbsp; <b>Member Sejak:</b> 4 Juni 2026</div>
+                    <div><b>Total Data Source Platform:</b> ${totalSources} &nbsp;&nbsp;|&nbsp;&nbsp; <b>Member Sejak:</b> 4 Juni 2026</div>
                 </div>
 
                 <div class="kpi-grid">
                     <div class="kpi-card"><div class="kpi-val" style="color:#0d5cff;">92.0%</div><div class="kpi-lbl">Avg. Quality Platform</div></div>
-                    <div class="kpi-card"><div class="kpi-val" style="color:#0d5cff;">${d.length}</div><div class="kpi-lbl">Total Data Sources</div></div>
-                    <div class="kpi-card"><div class="kpi-val" style="color:#f59e0b;">${d.length}</div><div class="kpi-lbl">Active Pipelines</div></div>
+                    <div class="kpi-card"><div class="kpi-val" style="color:#0d5cff;">${totalSources}</div><div class="kpi-lbl">Total Data Sources</div></div>
+                    <div class="kpi-card"><div class="kpi-val" style="color:#f59e0b;">${totalSources}</div><div class="kpi-lbl">Active Pipelines</div></div>
                     <div class="kpi-card"><div class="kpi-val" style="color:#10b981;">0</div><div class="kpi-lbl">Done Pipelines</div></div>
                     <div class="kpi-card"><div class="kpi-val" style="color:#10b981;">0</div><div class="kpi-lbl">Alerts Resolved</div></div>
                     
@@ -8365,9 +8378,11 @@
             jobId = pd['7'].job_id;
         }
 
-        let newWindow = null;
-        if (jobId) {
-            newWindow = window.open('', '_blank');
+        // Open window synchronously to avoid popup blockers
+        let reportWindow = window.open('', '_blank');
+        if (reportWindow) {
+            reportWindow.document.write('<html><head><title>Memuat Laporan...</title></head><body style="font-family:\'Segoe UI\',sans-serif; text-align:center; padding-top:100px; background:#12131a; color:#fff;"><h3>🚀 Memproses Pengiriman Final...</h3><p style="color:#888;">Mohon tunggu, data sedang dikirim dan laporan sedang disiapkan.</p></body></html>');
+            reportWindow.document.close();
         }
         
         try {
@@ -8386,19 +8401,22 @@
             if (res.ok) {
                 showToast(`🚀 Model berhasil dikirim ke Kelompok Implementasi!`, 'success');
                 if (jobId) {
-                    if (newWindow) {
-                        newWindow.location.href = `/api/train/pdf-report/${jobId}`;
+                    if (reportWindow) {
+                        reportWindow.location.href = `/api/train/pdf-report/${jobId}`;
                     } else {
                         window.open(`/api/train/pdf-report/${jobId}`, '_blank');
                     }
                 } else {
-                    if (newWindow) newWindow.close();
-                    printComprehensiveReport(0);
+                    if (reportWindow) {
+                        writeClientSideReportToWindow(reportWindow, pipelineState.grid4Ready[0]);
+                    } else {
+                        printComprehensiveReport(0);
+                    }
                 }
                 closePipelineModal('pm-overlay-final');
                 await loadPipelineData();
             } else {
-                if (newWindow) newWindow.close();
+                if (reportWindow) reportWindow.close();
                 let errMsg = 'Gagal mengirim data final';
                 try {
                     const errData = await res.json();
@@ -8412,7 +8430,7 @@
                 showToast(errMsg, 'error');
             }
         } catch (e) {
-            if (newWindow) newWindow.close();
+            if (reportWindow) reportWindow.close();
             showToast('Gagal: ' + e.message, 'error');
         }
     }
