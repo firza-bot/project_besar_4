@@ -76,6 +76,23 @@ def issue_full_detail_page(request, issue_id):
     
     c_status, _ = IssueCreationStatus.objects.get_or_create(uiux_issue_id=issue_id)
     
+    # -- SYNC FROM REMOTE TO LOCAL --
+    c_status.realization_status = c_status_data.get('realization_status', c_status.realization_status)
+    c_status.development_constraints = c_status_data.get('development_constraints', c_status.development_constraints)
+    c_status.save()
+
+    remote_orchs = api_data.get('orchestrations', [])
+    for ro in remote_orchs:
+        op, created = OrchestrationPhase.objects.get_or_create(
+            uiux_issue_id=issue_id,
+            category=ro.get('category'),
+            defaults={'status': ro.get('status', 'in_progress')}
+        )
+        if not created:
+            op.status = ro.get('status', op.status)
+            op.save()
+    # -------------------------------
+    
     if request.method == 'POST':
         # Process POST via API
         realization = request.POST.get('realization_status')
@@ -118,6 +135,11 @@ def issue_full_detail_page(request, issue_id):
     attachments = []
     if c_status.evidence_file:
         attachments.append(DummyObj(id=1, original_name=os.path.basename(c_status.evidence_file.name), file=c_status.evidence_file.url))
+    elif c_status_data.get('evidence_file'):
+        remote_url = c_status_data['evidence_file']
+        if not remote_url.startswith('http'):
+            remote_url = f"{INTRING_API_URL.replace('/api', '')}{remote_url}"
+        attachments.append(DummyObj(id=1, original_name=os.path.basename(remote_url), file=remote_url))
         
     context = {
         'issue': issue,
