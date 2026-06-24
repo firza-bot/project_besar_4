@@ -43,17 +43,17 @@ def landing_page(request):
 
 def login_page(request):
     if request.user.is_authenticated:
-        return redirect('/dashboard.html')
+        return redirect('/creation/dashboard.html')
     return render(request, 'login.html')
 
 def register_page(request):
     if request.user.is_authenticated:
-        return redirect('/dashboard.html')
+        return redirect('/creation/dashboard.html')
     return render(request, 'register.html')
 
 def dashboard_page(request):
     if not request.user.is_authenticated:
-        return redirect('/login.html')
+        return redirect('/creation/login.html')
     return render(request, 'dashboard.html')
 
 # === AUTH API ===
@@ -1056,11 +1056,11 @@ def data_entry_proses_page(request, submission_id):
     """Render halaman proses 8 tahap pipeline AI untuk submission tertentu."""
     from django.shortcuts import redirect
     if not request.user.is_authenticated:
-        return redirect('/login.html')
+        return redirect('/creation/login.html')
     try:
         submission = IntelligenceSubmission.objects.get(pk=submission_id)
     except IntelligenceSubmission.DoesNotExist:
-        return redirect('/dashboard')
+        return redirect('/creation/dashboard')
     # Deteksi apakah request dari mobile WebView (parameter ?platform=mobile)
     is_mobile = request.GET.get('platform', '').lower() == 'mobile'
     return render(request, 'structured_data_wizard.html', {
