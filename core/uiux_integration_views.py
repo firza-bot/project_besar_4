@@ -75,7 +75,15 @@ def issue_full_detail_page(request, issue_id):
         description=issue_data.get('description'),
         project=dummy_project,
         reporter=DummyObj(name=issue_data.get('reporter_name')),
-        assignee=DummyObj(name=issue_data.get('assignee_name'))
+        assignee=DummyObj(name=issue_data.get('assignee_name')),
+        story_points=issue_data.get('story_points'),
+        labels=issue_data.get('labels'),
+        due_date=issue_data.get('due_date'),
+        priority=issue_data.get('priority'),
+        type=issue_data.get('type'),
+        sprint=DummyObj(name=issue_data.get('sprint_name')),
+        created_at=issue_data.get('created_at'),
+        updated_at=issue_data.get('updated_at'),
     )
     
     c_status, _ = IssueCreationStatus.objects.get_or_create(uiux_issue_id=issue_id)
