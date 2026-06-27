@@ -270,11 +270,11 @@
             </div>
             <div class="nav-auth animate right delay-3">
                 {% if user.is_authenticated %}
-                    <a href="/dashboard.html" class="btn btn-login">Dashboard</a>
+                    <a href="/creation/dashboard.html" class="btn btn-login">Dashboard</a>
                     <button onclick="logoutLanding(event)" class="btn btn-register" style="cursor:pointer;">Sign Out</button>
                 {% else %}
-                    <a href="/login.html" class="btn btn-login">Sign In</a>
-                    <a href="/register.html" class="btn btn-register">Sign Up</a>
+                    <a href="/creation/login.html" class="btn btn-login">Sign In</a>
+                    <a href="/creation/register.html" class="btn btn-register">Sign Up</a>
                 {% endif %}
             </div>
         </div>
@@ -290,11 +290,11 @@
                 AI, dan kolaborasi tim dalam satu platform.</p>
             <div class="hero-buttons animate fade delay-5">
                 {% if user.is_authenticated %}
-                    <a href="/dashboard.html" class="btn btn-primary btn-animate">
+                    <a href="/creation/dashboard.html" class="btn btn-primary btn-animate">
                         <i class="fas fa-chart-line"></i> Dashboard
                     </a>
                 {% else %}
-                    <a href="/register.html" class="btn btn-primary btn-animate">
+                    <a href="/creation/register.html" class="btn btn-primary btn-animate">
                         <i class="fas fa-rocket"></i> Get Started
                     </a>
                 {% endif %}
@@ -515,10 +515,10 @@
                 <a href="#about" class="footer-link">About</a>
                 <a href="#team" class="footer-link">Team</a>
                 {% if user.is_authenticated %}
-                    <a href="/dashboard.html" class="footer-link">Dashboard</a>
+                    <a href="/creation/dashboard.html" class="footer-link">Dashboard</a>
                     <a href="#" onclick="logoutLanding(event)" class="footer-link">Sign Out</a>
                 {% else %}
-                    <a href="/login.html" class="footer-link">Sign In</a>
+                    <a href="/creation/login.html" class="footer-link">Sign In</a>
                 {% endif %}
             </div>
         </div>
@@ -538,7 +538,7 @@
         async function logoutLanding(event) {
             if (event) event.preventDefault();
             try {
-                await fetch('/api/auth/logout', { method: 'POST' });
+                await fetch('/creation/api/auth/logout', { method: 'POST' });
             } catch (e) { }
             try { localStorage.removeItem('ic_profile'); } catch (e) { }
             window.location.reload();

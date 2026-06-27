@@ -48,7 +48,7 @@
     <div class="ml-header">
         <div class="ml-title">Intelligence Creation Auto-ML</div>
         <p style="color: #94a3b8; margin-top: 10px;">Upload data Anda, pilih kolom target, dan biarkan AI menemukan model terbaik.</p>
-        <button class="btn btn-secondary" style="margin-top:20px; background:rgba(255,255,255,0.1); color:white; border:none;" onclick="window.location.href='/dashboard.html'">← Kembali ke Dashboard</button>
+        <button class="btn btn-secondary" style="margin-top:20px; background:rgba(255,255,255,0.1); color:white; border:none;" onclick="window.location.href = '/creation/dashboard.html'">← Kembali ke Dashboard</button>
     </div>
 
     <!-- TAHAP 1: UPLOAD DATA -->
@@ -138,7 +138,7 @@
             </div>
             
             <div style="text-align:center; margin-top:40px;">
-                <button class="btn btn-primary" onclick="window.location.href='/dashboard.html'">Selesai & Kembali ke Dashboard</button>
+                <button class="btn btn-primary" onclick="window.location.href = '/creation/dashboard.html'">Selesai & Kembali ke Dashboard</button>
             </div>
         </div>
     </div>
@@ -174,7 +174,7 @@
         formData.append('dataset', file);
         
         try {
-            const res = await fetch('/api/ml/upload', { method: 'POST', body: formData });
+            const res = await fetch('/creation/api/ml/upload', { method: 'POST', body: formData });
             const data = await res.json();
             
             if (!res.ok) throw new Error(data.error || 'Gagal upload');
@@ -218,7 +218,7 @@
         document.getElementById('rec-container').style.display = 'none';
         
         try {
-            const res = await fetch('/api/ml/recommend', { 
+            const res = await fetch('/creation/api/ml/recommend', { 
                 method: 'POST', 
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ file_path: currentData.filePath, target_column: target })
@@ -270,7 +270,7 @@
         document.getElementById('step-3').scrollIntoView({behavior: 'smooth'});
         
         try {
-            const res = await fetch('/api/ml/train', { 
+            const res = await fetch('/creation/api/ml/train', { 
                 method: 'POST', 
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ 

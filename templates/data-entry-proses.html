@@ -567,7 +567,7 @@
         });
 
         function goBack() {
-            window.location.href = '/dashboard';
+            window.location.href = '/creation/dashboard';
         }
 
         function selectProblemType(type) {
@@ -619,7 +619,7 @@
 
         async function loadPipelineData() {
             try {
-                const res = await fetch(`/api/v2/submissions/${submissionId}/`);
+                const res = await fetch(`/creation/api/v2/submissions/${submissionId}/`);
                 if (!res.ok) throw new Error('Gagal memuat detail submission');
                 const sub = await res.json();
 
@@ -1186,7 +1186,7 @@
 
             try {
                 const csrfToken = getCookie('csrftoken');
-                const res = await fetch(`/api/v2/submissions/${activeSubmissionId}/approve_stage/`, {
+                const res = await fetch(`/creation/api/v2/submissions/${activeSubmissionId}/approve_stage/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1221,7 +1221,7 @@
 
             try {
                 const csrfToken = getCookie('csrftoken');
-                const res = await fetch(`/api/v2/submissions/${activeSubmissionId}/`, {
+                const res = await fetch(`/creation/api/v2/submissions/${activeSubmissionId}/`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',

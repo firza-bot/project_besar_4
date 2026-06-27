@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: kelompok_creation_web_1
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - static_volume_v3:/app/staticfiles
+      - media_volume_v3:/app/mediafiles
+      - ./db.sqlite3:/app/db.sqlite3
+    environment:
+      - DEBUG=0
+      - SECRET_KEY=ganti_dengan_key_produksi_anda
+      - INTRING_API_URL=http://ieweb:8000/api
+    networks:
+      django_net:
+        aliases:
+          - django_backend
+      global_gateway_net:
+        aliases:
+          - kelompok_creation_web_1
+
+  nginx:
+    image: nginx:alpine
+    container_name: creation_nginx
+    restart: always
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_volume_v3:/app/staticfiles
+      - media_volume_v3:/app/mediafiles
+    depends_on:
+      - web
+    networks:
+      - django_net
+      - global_gateway_net
+
+volumes:
+  static_volume_v3:
+  media_volume_v3:
+
+networks:
+  django_net:
+    driver: bridge
+  global_gateway_net:
+    external: true

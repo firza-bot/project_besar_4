@@ -85,10 +85,6 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-    },
-    'uiux_db': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -169,3 +165,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 
 LOGIN_URL = '/login.html'
+
+FORCE_SCRIPT_NAME = '/creation'
+STATIC_URL = '/creation/static/'
+MEDIA_URL = '/creation/media/'
+

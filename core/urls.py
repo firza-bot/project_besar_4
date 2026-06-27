@@ -55,7 +55,7 @@ urlpatterns = [
     path(
         'training.html',
         lambda request: render(request, 'training.html')
-        if request.user.is_authenticated else redirect('/login.html'),
+        if request.user.is_authenticated else redirect('/creation/login.html'),
         name='training'
     ),
 

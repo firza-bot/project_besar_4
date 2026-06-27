@@ -397,8 +397,8 @@
         </form>
 
         <div class="auth-footer">
-            <p>Belum punya akun? <a href="/register.html">Daftar di sini</a></p>
-            <p style="margin-top: 14px;"><a href="/">← Kembali ke Beranda</a></p>
+            <p>Belum punya akun? <a href="/creation/register.html">Daftar di sini</a></p>
+            <p style="margin-top: 14px;"><a href="/creation/">← Kembali ke Beranda</a></p>
         </div>
     </div>
 
@@ -495,7 +495,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const errorEl  = document.getElementById('error-message');
 
     try {
-        const res  = await fetch('/api/auth/login', {
+        const res  = await fetch('/creation/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -508,7 +508,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
             return;
         }
 
-        window.location.href = '/dashboard.html';
+        window.location.href = '/creation/dashboard.html';
     } catch (err) {
         errorEl.textContent = 'Terjadi kesalahan jaringan';
         errorEl.classList.add('show');

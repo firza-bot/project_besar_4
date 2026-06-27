@@ -109,7 +109,7 @@ function renderFeatures() {
 // =====================
 async function loadStats() {
     try {
-        var res = await fetch('/api/stats');
+        var res = await fetch('/creation/api/stats');
         var result = await res.json();
         var stats = result.stats || {};
         
@@ -250,7 +250,7 @@ function showToast(msg, type) {
 }
 
 async function logout() { 
-    try { await fetch('/api/auth/logout', { method: 'POST' }); } catch(e) {}
-    window.location.href = '/'; 
+    try { await fetch('/creation/api/auth/logout', { method: 'POST' }); } catch(e) {}
+    window.location.href = '/creation/'; 
 }
 document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(e); });
