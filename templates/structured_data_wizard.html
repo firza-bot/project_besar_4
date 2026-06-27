@@ -147,8 +147,8 @@
     <!-- Pass Django context variables to React global scope -->
     <script>
         window.SUBMISSION_ID = "{{ submission_id }}";
-        // Configure API URL base for Django hosted endpoints
-        window.BACKEND_URL = "/creation";
+        // Configure API URL base dynamically to support both Nginx (/creation) and local dev
+        window.BACKEND_URL = window.location.pathname.startsWith('/creation') ? '/creation' : '';
         // Pass platform flag to React app
         window.IS_MOBILE_WEBVIEW = {{ is_mobile|yesno:"true,false" }};
     </script>
